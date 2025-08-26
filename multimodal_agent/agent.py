@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 
 from multimodal_agent.callbacks import before_agent_callback
-from multimodal_agent.tools import convert_image_to_grayscale
+from multimodal_agent.tools import convert_image_to_grayscale, mcp_tools
 
 
 root_agent = Agent(
@@ -19,5 +19,5 @@ E.g.
 {"artifact_filename": "uploaded-file-2-filename"}
 """,
     before_agent_callback=before_agent_callback,
-    tools=[convert_image_to_grayscale],
+    tools=[mcp_tools,convert_image_to_grayscale],
 )

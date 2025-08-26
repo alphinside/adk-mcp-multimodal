@@ -2,6 +2,14 @@ from google.adk.tools import ToolContext
 from google.genai.types import Part
 import numpy as np
 import cv2
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams
+
+mcp_tools = MCPToolset(
+    connection_params=StreamableHTTPConnectionParams(
+        url="http://0.0.0.0:8000/mcp",
+        timeout=30,
+    )
+)
 
 
 async def convert_image_to_grayscale(
