@@ -1,6 +1,10 @@
 from google.adk.agents.llm_agent import Agent
 
-from multimodal_agent.callbacks import before_agent_callback, before_tool_callback, after_tool_callback
+from multimodal_agent.callbacks import (
+    before_agent_callback,
+    before_tool_callback,
+    after_tool_callback,
+)
 from multimodal_agent.tools import convert_image_to_grayscale, mcp_tools
 
 
@@ -32,5 +36,5 @@ E.g.
     before_agent_callback=before_agent_callback,
     before_tool_callback=before_tool_callback,
     after_tool_callback=after_tool_callback,
-    tools=[mcp_tools,convert_image_to_grayscale],
+    tools=[mcp_tools, convert_image_to_grayscale],
 )
