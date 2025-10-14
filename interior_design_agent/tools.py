@@ -1,6 +1,4 @@
 from typing import Optional, Literal
-import base64
-from pathlib import Path
 from google import genai
 from dotenv import load_dotenv
 import os
@@ -137,9 +135,9 @@ async def edit_image(
 ) -> dict[str, str]:
     """Edit an existing interior image based on modification instructions.
 
-    This tool modifies existing room photos or furniture images according to user 
-    specifications. Use this when users provide a photo of their current space or 
-    furniture piece and want to see specific changes, such as different furniture, 
+    This tool modifies existing room photos or furniture images according to user
+    specifications. Use this when users provide a photo of their current space or
+    furniture piece and want to see specific changes, such as different furniture,
     colors, layouts, styles, or modifications to individual furniture items.
 
     Args:
@@ -173,7 +171,7 @@ async def edit_image(
             preserve_structure=True,
             intensity="medium"
         )
-        
+
         # Edit individual furniture
         result = await edit_image(
             image_artifact_id="sofa_456.png",
@@ -184,7 +182,7 @@ async def edit_image(
     """
     try:
         # Load image artifact
-        image_artifact = await callback_context.load_artifact(filename=image_artifact_id)
+        image_artifact = await tool_context.load_artifact(filename=image_artifact_id)
 
         # Build edit prompt with constraints
         structure_note = (

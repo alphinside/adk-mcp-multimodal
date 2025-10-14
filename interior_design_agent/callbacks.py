@@ -22,17 +22,13 @@ async def before_model_modifier(
                     "generated_image_artifact_id"
                 ]
                 artifact = await callback_context.load_artifact(filename=artifact_id)
-                
+
                 # Original function response
                 modified_parts.append(part)
 
                 # Artifact content appended after function response
                 modified_parts.append(
-                    Part(
-                        text=(
-                            f"Below is the content of artifact ID : {artifact_id}"
-                        )
-                    )
+                    Part(text=(f"Below is the content of artifact ID : {artifact_id}"))
                 )
                 modified_parts.append(artifact)
             else:
