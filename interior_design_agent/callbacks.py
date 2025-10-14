@@ -45,11 +45,13 @@ async def before_model_modifier(
             elif (part.inline_data and _idx == 0) or (
                 part.inline_data
                 and content.parts[_idx - 1].text
-                and not content.parts[_idx - 1].text.startswith(
-                    "[Function Response Artifact]"
-                )
-                and not content.parts[_idx - 1].text.startswith(
-                    "[User Uploaded Artifact]"
+                and (
+                    not content.parts[_idx - 1].text.startswith(
+                        "[Function Response Artifact]"
+                    )
+                    or not content.parts[_idx - 1].text.startswith(
+                        "[User Uploaded Artifact]"
+                    )
                 )
             ):
                 # Create timestamp-based identifier with short hash

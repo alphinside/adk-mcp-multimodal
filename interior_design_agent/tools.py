@@ -139,16 +139,27 @@ async def edit_image(
     specifications. Use this when users provide a photo of their current space or
     furniture piece and want to see specific changes, such as different furniture,
     colors, layouts, styles, or modifications to individual furniture items.
+    
+    **IMPORTANT for tidying/organizing rooms**: If the user wants to make a room
+    tidier or more organized, you MUST explicitly specify which objects need to be
+    removed and which objects need to be repositioned. Vague requests like "make it
+    tidier" will not work - be specific about what changes to make.
 
     Args:
         image_artifact_id: Artifact image identifier. Should be a clear photo of an
             interior space OR individual furniture piece. **This can be used to edit
             both complete room photos and standalone furniture images** (e.g., to change
             a sofa's color, modify a chair's upholstery, or adjust furniture details).
-        edit_description: Detailed description of the changes to make
-                         (e.g., "change wall color to sage green",
-                         "replace the sofa with a modern sectional",
-                         "add warm ambient lighting").
+        edit_description: Detailed description of the changes to make.
+                         For tidying/organizing: explicitly list objects to remove
+                         and objects to reposition.
+                         Examples:
+                         - "change wall color to sage green"
+                         - "replace the sofa with a modern sectional"
+                         - "add warm ambient lighting"
+                         - "remove the magazines from the coffee table, remove the throw
+                           pillows from the floor, reposition the side table against
+                           the wall"
         preserve_structure: If True, maintains the room's architectural structure
                           and only modifies specified elements. If False, allows
                           more dramatic transformations. Default: True.
@@ -157,8 +168,8 @@ async def edit_image(
 
     Returns:
         dict with keys:
-            - 'edited_image_url': URL or base64 encoded edited image data
-            - 'original_image_url': Reference to the original image
+            - 'edited_image_artifact_id': Artifact ID for the edited image
+            - 'original_image_artifact_id': Artifact ID for the original image
             - 'edit_prompt': The full edit prompt used
             - 'status': Success or error status
             - 'message': Additional information or error details
@@ -178,6 +189,14 @@ async def edit_image(
             edit_description="Change the upholstery from beige to deep navy blue velvet",
             preserve_structure=True,
             intensity="subtle"
+        )
+        
+        # Tidy/organize a room (must be explicit)
+        result = await edit_image(
+            image_artifact_id="messy_room_789.png",
+            edit_description="Remove the clothes from the chair, remove books from the floor, reposition the desk lamp to the center of the desk, remove the empty cups from the side table",
+            preserve_structure=True,
+            intensity="medium"
         )
     """
     try:
