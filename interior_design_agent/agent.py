@@ -1,5 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 from interior_design_agent.tools import generate_concept_image
+from interior_design_agent.callbacks import before_model_modifier
 
 root_agent = Agent(
     model="gemini-2.5-flash",
@@ -34,4 +35,5 @@ Communication style:
     tools=[
         generate_concept_image,
     ],
+    before_model_callback=before_model_modifier,
 )
