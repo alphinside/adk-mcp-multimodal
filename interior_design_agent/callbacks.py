@@ -54,22 +54,25 @@ async def before_model_modifier(
                     )
                 )
             ):
-                # Create timestamp-based identifier with short hash
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-                # Generate short hash from the image data or timestamp
-                hash_input = timestamp.encode("utf-8")
-                short_hash = hashlib.md5(hash_input).hexdigest()[:8]
+                # Create hash-based identifier from filename and content
+                filename = part.inline_data.display_name or "uploaded_image"
+                image_data = part.inline_data.data
+                
+                # Combine filename and image data for hash
+                hash_input = filename.encode("utf-8") + image_data
+                content_hash = hashlib.sha256(hash_input).hexdigest()[:16]
 
                 # Extract file extension from mime type
                 mime_type = part.inline_data.mime_type
                 extension = mime_type.split("/")[-1]
 
-                artifact_id = f"usr_upl_img_{short_hash}.{extension}"
+                artifact_id = f"usr_upl_img_{content_hash}.{extension}"
 
-                await callback_context.save_artifact(
-                    filename=artifact_id, artifact=part
-                )
+                if artifact_id not in await callback_context.list_artifacts():
+                    await callback_context.save_artifact(
+                        filename=artifact_id, artifact=part
+                    )
+
                 modified_parts.append(
                     Part(
                         text=(
@@ -82,5 +85,3 @@ async def before_model_modifier(
                 modified_parts.append(part)
 
         content.parts = modified_parts
-
-    breakpoint()
