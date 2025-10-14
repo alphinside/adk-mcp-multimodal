@@ -140,6 +140,11 @@ async def edit_image(
     furniture piece and want to see specific changes, such as different furniture,
     colors, layouts, styles, or modifications to individual furniture items.
     
+    **CRITICAL: ONE FOCUSED EDIT DESCRIPTION PER CALL**: This tool should be invoked with ONE
+    focused edit description at a time. It CANNOT handle multiple edit descriptions 
+    in a single call. If the user wants multiple changes, you must call this tool multiple times
+    sequentially, using the output from one call as input to the next.
+    
     **IMPORTANT for tidying/organizing rooms**: If the user wants to make a room
     tidier or more organized, you MUST explicitly specify which objects need to be
     removed and which objects need to be repositioned. Vague requests like "make it
@@ -150,16 +155,15 @@ async def edit_image(
             interior space OR individual furniture piece. **This can be used to edit
             both complete room photos and standalone furniture images** (e.g., to change
             a sofa's color, modify a chair's upholstery, or adjust furniture details).
-        edit_description: Detailed description of the changes to make.
-                         For tidying/organizing: explicitly list objects to remove
-                         and objects to reposition.
-                         Examples:
+        edit_description: Single focused description of the change to make.
+                         For tidying/organizing: specify which specific objects to remove
+                         or reposition in one focused action.
+                         Examples of single focused edits:
                          - "change wall color to sage green"
                          - "replace the sofa with a modern sectional"
                          - "add warm ambient lighting"
-                         - "remove the magazines from the coffee table, remove the throw
-                           pillows from the floor, reposition the side table against
-                           the wall"
+                         - "remove the stack of magazines from the coffee table"
+                         - "reposition the side table against the wall"
         preserve_structure: If True, maintains the room's architectural structure
                           and only modifies specified elements. If False, allows
                           more dramatic transformations. Default: True.
@@ -175,10 +179,10 @@ async def edit_image(
             - 'message': Additional information or error details
 
     Examples:
-        # Edit a room photo
+        # Edit a room photo - change wall color
         result = await edit_image(
             image_artifact_id="room_photo_123.png",
-            edit_description="Replace the beige walls with a soft blue-gray color and add modern pendant lighting",
+            edit_description="Change the beige walls to a soft blue-gray color",
             preserve_structure=True,
             intensity="medium"
         )
@@ -191,10 +195,26 @@ async def edit_image(
             intensity="subtle"
         )
         
-        # Tidy/organize a room (must be explicit)
+        # Tidy/organize a room - single focused action (must be explicit)
         result = await edit_image(
             image_artifact_id="messy_room_789.png",
-            edit_description="Remove the clothes from the chair, remove books from the floor, reposition the desk lamp to the center of the desk, remove the empty cups from the side table",
+            edit_description="Remove the stack of books and magazines from the coffee table",
+            preserve_structure=True,
+            intensity="medium"
+        )
+        
+        # Sequential edits - make multiple changes by chaining calls
+        # First edit: change wall color
+        result1 = await edit_image(
+            image_artifact_id="room_original.png",
+            edit_description="Change wall color to sage green",
+            preserve_structure=True,
+            intensity="medium"
+        )
+        # Second edit: use output from first edit
+        result2 = await edit_image(
+            image_artifact_id=result1["edited_image_artifact_id"],
+            edit_description="Replace the wooden coffee table with a modern glass one",
             preserve_structure=True,
             intensity="medium"
         )

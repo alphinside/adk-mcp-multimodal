@@ -82,3 +82,5 @@ async def before_model_modifier(
                 modified_parts.append(part)
 
         content.parts = modified_parts
+
+    breakpoint()
