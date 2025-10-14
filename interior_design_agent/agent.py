@@ -1,5 +1,5 @@
 from google.adk.agents.llm_agent import Agent
-from interior_design_agent.tools import generate_concept_image
+from interior_design_agent.tools import generate_concept_image, edit_image
 from interior_design_agent.callbacks import before_model_modifier
 
 root_agent = Agent(
@@ -34,6 +34,7 @@ Communication style:
 - Proactive in suggesting improvements and alternatives""",
     tools=[
         generate_concept_image,
+        edit_image,
     ],
     before_model_callback=before_model_modifier,
 )
