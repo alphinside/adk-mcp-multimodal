@@ -22,10 +22,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "google-adk" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "google-adk", specifier = ">=1.16.0" }]
+requires-dist = [
+    { name = "google-adk", specifier = ">=1.16.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+]
 
 [[package]]
 name = "alembic"
