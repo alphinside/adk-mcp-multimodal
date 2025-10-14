@@ -139,12 +139,12 @@ async def edit_image(
     specifications. Use this when users provide a photo of their current space or
     furniture piece and want to see specific changes, such as different furniture,
     colors, layouts, styles, or modifications to individual furniture items.
-    
+
     **CRITICAL: ONE FOCUSED EDIT DESCRIPTION PER CALL**: This tool should be invoked with ONE
-    focused edit description at a time. It CANNOT handle multiple edit descriptions 
+    focused edit description at a time. It CANNOT handle multiple edit descriptions
     in a single call. If the user wants multiple changes, you must call this tool multiple times
     sequentially, using the output from one call as input to the next.
-    
+
     **IMPORTANT for tidying/organizing rooms**: If the user wants to make a room
     tidier or more organized, you MUST explicitly specify which objects need to be
     removed and which objects need to be repositioned. Vague requests like "make it
@@ -194,7 +194,7 @@ async def edit_image(
             preserve_structure=True,
             intensity="subtle"
         )
-        
+
         # Tidy/organize a room - single focused action (must be explicit)
         result = await edit_image(
             image_artifact_id="messy_room_789.png",
@@ -202,7 +202,7 @@ async def edit_image(
             preserve_structure=True,
             intensity="medium"
         )
-        
+
         # Sequential edits - make multiple changes by chaining calls
         # First edit: change wall color
         result1 = await edit_image(
