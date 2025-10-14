@@ -14,15 +14,20 @@ async def before_model_modifier(
 
         modified_parts = []
         for _idx, part in enumerate(content.parts):
-            if (
-                part.function_response
-                and part.function_response.name
-                in ["generate_concept_image", "edit_image"]
-                and part.function_response.response["generated_image_artifact_id"]
-            ):
-                artifact_id = part.function_response.response[
-                    "generated_image_artifact_id"
-                ]
+            if part.function_response and part.function_response.name in [
+                "generate_concept_image",
+                "edit_image",
+            ]:
+                function_name = part.function_response.name
+                if function_name == "generate_concept_image":
+                    artifact_id_key = "generated_image_artifact_id"
+                else:
+                    artifact_id_key = "edited_image_artifact_id"
+
+                artifact_id = part.function_response.response[artifact_id_key]
+                if not artifact_id:
+                    continue
+
                 artifact = await callback_context.load_artifact(filename=artifact_id)
 
                 # Original function response
@@ -42,6 +47,9 @@ async def before_model_modifier(
                 and content.parts[_idx - 1].text
                 and not content.parts[_idx - 1].text.startswith(
                     "[Function Response Artifact]"
+                )
+                and not content.parts[_idx - 1].text.startswith(
+                    "[User Uploaded Artifact]"
                 )
             ):
                 # Create timestamp-based identifier with short hash
