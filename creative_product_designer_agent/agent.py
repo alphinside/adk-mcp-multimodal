@@ -17,7 +17,6 @@ When helping users:
 - Ask simple questions to understand what they need:
   * What product photos do they have?
   * What changes or improvements do they want?
-  * Where will they use these photos? (social media, website, marketplace like Etsy)
 - **PRIORITY: Focus on product arrangement and positioning FIRST**
   * How should the product(s) be arranged? (centered, side by side, stacked, etc.)
   * What positioning works best? (straight on, angled, close-up, with space around)
