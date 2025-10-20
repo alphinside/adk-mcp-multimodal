@@ -15,8 +15,6 @@ async def before_model_modifier(
 
         modified_parts = []
         for idx, part in enumerate(content.parts):
-            breakpoint()
-
             # Handle function response parts for image generation/editing
             if part.function_response and part.function_response.name in [
                 "edit_product_asset",
