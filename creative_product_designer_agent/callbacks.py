@@ -15,10 +15,11 @@ async def before_model_modifier(
 
         modified_parts = []
         for idx, part in enumerate(content.parts):
+            breakpoint()
+
             # Handle function response parts for image generation/editing
             if part.function_response and part.function_response.name in [
-                "generate_concept_image",
-                "edit_image",
+                "edit_product_asset",
             ]:
                 processed_parts = await _process_function_response_part(part, callback_context)
             # Handle user-uploaded inline images
@@ -32,8 +33,6 @@ async def before_model_modifier(
 
         content.parts = modified_parts
 
-    breakpoint()
-
 async def _process_function_response_part(
     part: Part, callback_context: CallbackContext
 ) -> List[Part]:
@@ -43,6 +42,7 @@ async def _process_function_response_part(
         List of parts including the original function response and artifact.
     """
     artifact_id = part.function_response.response.get("tool_response_artifact_id")
+    breakpoint()
     
     if not artifact_id:
         return [part]
