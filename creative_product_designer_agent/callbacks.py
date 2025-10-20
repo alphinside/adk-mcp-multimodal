@@ -32,13 +32,7 @@ async def before_model_modifier(
 
         content.parts = modified_parts
 
-def _get_artifact_id_key(function_name: str) -> str:
-    """Get the artifact ID key based on function name."""
-    if function_name == "generate_concept_image":
-        return "generated_image_artifact_id"
-    else:
-        return "edited_image_artifact_id"
-
+    breakpoint()
 
 async def _process_function_response_part(
     part: Part, callback_context: CallbackContext
@@ -48,9 +42,7 @@ async def _process_function_response_part(
     Returns:
         List of parts including the original function response and artifact.
     """
-    function_name = part.function_response.name
-    artifact_id_key = _get_artifact_id_key(function_name)
-    artifact_id = part.function_response.response.get(artifact_id_key)
+    artifact_id = part.function_response.response.get("tool_response_artifact_id")
     
     if not artifact_id:
         return [part]
@@ -60,7 +52,7 @@ async def _process_function_response_part(
     return [
         part,  # Original function response
         Part(
-            text=f"[Function Response Artifact] Below is the content of artifact ID : {artifact_id}"
+            text=f"[Tool Response Artifact] Below is the content of artifact ID : {artifact_id}"
         ),
         artifact,
     ]
@@ -111,7 +103,7 @@ def _is_user_uploaded_image(part: Part, idx: int, parts: List[Part]) -> bool:
     
     # Inline data preceded by artifact markers should not be processed again
     is_artifact_marker = (
-        previous_part.text.startswith("[Function Response Artifact]")
+        previous_part.text.startswith("[Tool Response Artifact]")
         or previous_part.text.startswith("[User Uploaded Artifact]")
     )
     
