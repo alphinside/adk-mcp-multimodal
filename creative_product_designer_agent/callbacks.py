@@ -15,18 +15,21 @@ async def before_model_modifier(
 
         modified_parts = []
         for idx, part in enumerate(content.parts):
-            # Handle function response parts for image generation/editing
-            if part.function_response and part.function_response.name in [
-                "edit_product_asset",
-            ]:
-                processed_parts = await _process_function_response_part(
-                    part, callback_context
-                )
             # Handle user-uploaded inline images
-            elif _is_user_uploaded_image(part, idx, content.parts):
+            if part.inline_data:
                 processed_parts = await _process_inline_data_part(
                     part, callback_context
                 )
+            # Handle function response parts for image generation/editing
+            elif part.function_response :  
+                if part.function_response.name in [
+                    "edit_product_asset",
+                ]:
+                    processed_parts = await _process_function_response_part(
+                        part, callback_context
+                    )
+                else:
+                    processed_parts = [part]
             # Default: keep part as-is
             else:
                 processed_parts = [part]
@@ -34,62 +37,6 @@ async def before_model_modifier(
             modified_parts.extend(processed_parts)
 
         content.parts = modified_parts
-
-
-async def _process_function_response_part(
-    part: Part, callback_context: CallbackContext
-) -> List[Part]:
-    """Process function response parts and append artifacts.
-
-    Returns:
-        List of parts including the original function response and artifact.
-    """
-    artifact_id = part.function_response.response.get("tool_response_artifact_id")
-
-    if not artifact_id:
-        return [part]
-
-    artifact = await callback_context.load_artifact(filename=artifact_id)
-
-    return [
-        part,  # Original function response
-        Part(
-            text=f"[Tool Response Artifact] Below is the content of artifact ID : {artifact_id}"
-        ),
-        artifact,
-    ]
-
-
-def _is_user_uploaded_image(part: Part, idx: int, parts: List[Part]) -> bool:
-    """Check if part is a user-uploaded image that needs processing.
-
-    Args:
-        part: The current part to check.
-        idx: Index of the current part.
-        parts: List of all parts.
-
-    Returns:
-        True if this is a user-uploaded image that should be processed.
-    """
-    if not part.inline_data:
-        return False
-
-    # First inline data is always user-uploaded
-    if idx == 0:
-        return True
-
-    # Check if previous part is text and not an artifact marker
-    previous_part = parts[idx - 1]
-    if not previous_part.text:
-        return True
-
-    # Inline data preceded by artifact markers should not be processed again
-    is_artifact_marker = previous_part.text.startswith(
-        "[Tool Response Artifact]"
-    ) or previous_part.text.startswith("[User Uploaded Artifact]")
-
-    return not is_artifact_marker
-
 
 async def _process_inline_data_part(
     part: Part, callback_context: CallbackContext
@@ -131,3 +78,26 @@ def _generate_artifact_id(part: Part) -> str:
     extension = mime_type.split("/")[-1]
 
     return f"usr_upl_img_{content_hash}.{extension}"
+
+async def _process_function_response_part(
+    part: Part, callback_context: CallbackContext
+) -> List[Part]:
+    """Process function response parts and append artifacts.
+
+    Returns:
+        List of parts including the original function response and artifact.
+    """
+    artifact_id = part.function_response.response.get("tool_response_artifact_id")
+
+    if not artifact_id:
+        return [part]
+
+    artifact = await callback_context.load_artifact(filename=artifact_id)
+
+    return [
+        part,  # Original function response
+        Part(
+            text=f"[Tool Response Artifact] Below is the content of artifact ID : {artifact_id}"
+        ),
+        artifact,
+    ]
