@@ -40,7 +40,6 @@ async def _process_function_response_part(
         List of parts including the original function response and artifact.
     """
     artifact_id = part.function_response.response.get("tool_response_artifact_id")
-    breakpoint()
     
     if not artifact_id:
         return [part]
