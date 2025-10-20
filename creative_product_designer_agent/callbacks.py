@@ -81,7 +81,7 @@ def _is_user_uploaded_image(part: Part, idx: int, parts: List[Part]) -> bool:
     # Check if previous part is text and not an artifact marker
     previous_part = parts[idx - 1]
     if not previous_part.text:
-        return False
+        return True
 
     # Inline data preceded by artifact markers should not be processed again
     is_artifact_marker = previous_part.text.startswith(

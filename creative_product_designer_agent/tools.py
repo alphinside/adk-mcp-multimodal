@@ -41,18 +41,21 @@ async def edit_product_asset(
                           - "replace background with rustic dark wood table surface with natural grain texture visible, warm brown tones"
 
                           For ADDING PROPS:
-                          - "add fresh pink roses and eucalyptus leaves arranged naturally around the product on the left and right sides, with some petals scattered in front"
+                          - "add fresh pink roses and eucalyptus leaves arranged naturally around the product on the left and right sides, 
+                            with some petals scattered in front"
                           - "add fresh basil leaves and cherry tomatoes scattered around the product naturally"
 
                           For LIGHTING changes:
-                          - "add soft natural window light coming from the left side at 45 degree angle, creating gentle shadows on the right side, warm morning atmosphere"
+                          - "add soft natural window light coming from the left side at 45 degree angle, creating gentle shadows on the 
+                            right side, warm morning atmosphere"
                           - "increase brightness with soft diffused studio lighting from above, eliminating harsh shadows"
 
                           For ARRANGEMENT/POSITIONING:
                           - "reposition product to be perfectly centered in frame with equal space on all sides"
                           - "arrange these three products in a horizontal line, evenly spaced with 2 inches between each"
 
-                          Note: When combining multiple products, you can include background/lighting in the initial arrangement since it's one cohesive setup
+                          Note: When combining multiple products, you can include background/lighting in the initial arrangement since it's 
+                                one cohesive setup
         image_artifact_ids: List of image IDs to edit or combine.
                           - For single image: provide a list with one item (e.g., ["product.png"])
                           - For multiple images: provide a list with multiple items (e.g., ["product1.png", "product2.png"])
@@ -125,6 +128,16 @@ async def edit_product_asset(
         image_artifacts = []
         for img_id in image_artifact_ids:
             artifact = await tool_context.load_artifact(filename=img_id)
+            if artifact is None:
+                logging.error(f"Artifact {img_id} not found")
+                return {
+                    "status": "error",
+                    "tool_response_artifact_id": "",
+                    "tool_input_artifact_ids": "",
+                    "edit_prompt": change_description,
+                    "message": f"Artifact {img_id} not found",
+                }
+
             image_artifacts.append(artifact)
 
         # Build edit prompt
