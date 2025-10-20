@@ -1,10 +1,10 @@
-# Product Photo Assistant 📸
+# Product Photo Editor Assistant 📸
 
-Your friendly AI helper for creating beautiful product photos for your small business!
+Your friendly AI helper for editing and enhancing product photos for your small business!
 
 ## What Is This?
 
-This tool helps small business owners create professional-looking product photos without needing expensive cameras or photography skills. Perfect for:
+This tool helps small business owners edit and improve their existing product photos to make them look professional and polished. Perfect for:
 
 - Handmade crafts and artisan goods
 - Food and beverage products
@@ -15,53 +15,34 @@ This tool helps small business owners create professional-looking product photos
 
 ## What Can It Do?
 
-### 1. Create New Product Photos
+### 1. Edit & Improve Your Product Photos
 
-Just describe your product and where you want to show it, and the AI will create a professional photo for you.
+**IMPORTANT:** You need to provide your product photo(s) to use this tool.
 
-**What you need to tell it:**
-
-- **Your product** (required) - What is it? What does it look like?
-  - Example: "handmade lavender soap with dried flowers"
-  - Example: "ceramic coffee mug in navy blue"
-  - Example: "organic honey in a glass jar"
-
-- **The setting** (optional) - Where should your product be?
-  - Example: "on a white background"
-  - Example: "on a wooden table with natural light"
-  - Example: "surrounded by fresh ingredients"
-  - If you don't specify, it will use a nice clean background
-
-**Simple Example:**
-
-```
-Product: handmade candle in a glass jar
-Setting: clean white background
-```
-
-Result: You'll get a professional product photo!
-
-### 2. Edit Existing Photos
-
-Already have a photo but want to change something? You can make one change at a time.
+Already have a product photo but want to make it better? You can make changes one at a time for best results.
 
 **What you can change:**
 
-- Background (e.g., "change background to white")
-- Add items (e.g., "add flowers around the product")
-- Lighting (e.g., "make it brighter")
-- Remove items (e.g., "remove the cup from the background")
-- Product color (e.g., "change color to blue")
+- **Background** - Change to white, wood, marble, or any setting
+- **Add props** - Add flowers, ingredients, decorative elements
+- **Lighting** - Adjust brightness, add natural or studio lighting
+- **Remove items** - Clean up unwanted objects from the background
+- **Colors & effects** - Adjust product colors, add water droplets, etc.
+- **Composition** - Adjust positioning and arrangement
 
 **Simple Example:**
 
-```
-Change: add some fresh herbs around the product
+```text
+Product: [skincare_product.png]
+Change: add fresh green eucalyptus leaves and sprigs arranged naturally around 
+the product on both sides, with water droplets, on a white marble surface
 ```
 
-**Need multiple changes?** No problem! Just do them one at a time.
+**Need multiple changes?** No problem! Just do them one at a time for best results.
 
-### 3. Combine Multiple Products
+### 2. Combine Multiple Products
+
+**Use this when:** You have photos of multiple products and want to show them together in one image.
 
 Want to show multiple products together? You can combine several product photos into one!
 
@@ -92,44 +73,60 @@ Result: All three candles beautifully arranged in one photo!
 
 ## How It Works
 
-1. **Tell the assistant** what product you're selling
-2. **Describe** what kind of photo you want
-3. **Get** a professional photo in seconds!
-4. **Make changes** if you want something different
+1. **Share your product photo(s)** - Upload the images you want to edit
+2. **Tell the assistant what changes you want** - Be as detailed as possible!
+3. **Get your enhanced photo** in seconds
+4. **Make more changes** if needed - iterate until perfect!
 
 The assistant will ask friendly questions to make sure it understands what you need. Don't worry about using perfect words - just describe what you want in your own way!
 
+### 📌 Quick Guide
+
+- **Have one photo?** → Edit it to improve background, lighting, add props, etc.
+- **Have multiple photos?** → Combine them into one beautiful arrangement
+- **Want multiple changes?** → Do them one at a time for best results
+
+**Example Workflow:**
+1. Upload your product photo (e.g., soap bar)
+2. Ask: "change background to rustic dark wood and add lavender sprigs on the sides"
+3. Get enhanced photo with new background and props
+4. Make another edit if needed: "add soft morning light from the left"
+5. Download your professional photo for your shop!
+
 ## Tips for Best Results
 
-- Be specific about your product (colors, materials, special features)
+- **Be as detailed as possible** - The more specific your description, the better the result!
+- Include specifics: colors, positions, spacing, lighting direction, mood/style
+- Instead of "make it brighter" → say "add soft natural window light from the left side"
+- Instead of "add flowers" → say "add fresh pink roses on the left and right sides"
 - Keep backgrounds simple for online store photos
 - Try lifestyle settings (like kitchen tables) for social media
 - Make one change at a time when editing photos
 - Don't be afraid to try different styles!
 
-## Examples of What People Make
+## Examples of Edits People Make
 
 **For a Candle Shop:**
-- "Soy candle in amber glass jar with wooden lid on white background"
-- "Lavender candle surrounded by fresh lavender sprigs on rustic wood"
+- Edit: "change background to soft white with subtle gradient, studio lighting from top"
+- Edit: "add fresh lavender sprigs arranged naturally on the left and right sides"
 
 **For a Bakery:**
-- "Chocolate chip cookies stacked on a plate"
-- "Artisan sourdough bread on wooden cutting board with morning light"
+- Edit: "add warm morning light from the left at 45 degree angle, cozy atmosphere"
+- Edit: "place product on rustic dark wood table with natural grain texture visible"
 
 **For Handmade Jewelry:**
-- "Silver necklace with turquoise pendant on white background"
-- "Handcrafted earrings displayed on marble surface"
+- Edit: "change to clean white background, remove all shadows"
+- Edit: "add marble surface underneath, soft diffused lighting from above"
 
 **For Skincare Products:**
-- "Natural face cream jar with botanical ingredients around it"
-- "Organic lip balm tubes on clean white surface"
+- Edit: "add fresh eucalyptus leaves and water droplets around the product"
+- Edit: "change to light oak wood surface, add natural botanical elements"
 
 **For Product Bundles:**
-- Combine three different soap bars: "arrange these soaps side by side on marble"
-- Create a gift set: "show these items together as a spa gift basket"
-- Show variations: "display all three candle scents in a row on white background"
+- Combine three soap photos: "arrange side by side on white marble, evenly spaced"
+- Combine gift set items: "arrange in semi-circle on light oak wood, add lavender sprigs"
+- Show variations: "display all three colors in horizontal line, soft shadows"
 
 ---
 
-**Ready to make your products look amazing? Just start chatting with the assistant and describe what you need!** 🎨
+**Ready to enhance your product photos? Upload your images and start chatting with the assistant!** 🎨

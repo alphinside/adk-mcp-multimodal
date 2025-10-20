@@ -14,105 +14,10 @@ client = genai.Client(
     location=os.getenv("GOOGLE_CLOUD_LOCATION"),
 )
 
-
-async def generate_product_asset(
-    tool_context: ToolContext,
-    product_description: str,
-    scene_description: Optional[str] = None,
-) -> dict[str, str]:
-    """Generate a professional product photo for your business.
-
-    This tool creates beautiful product images perfect for social media, your website,
-    or online marketplace listings. Just describe what you want to see!
-
-    Args:
-        product_description: Describe your product (required).
-                           Tell us what it is, what it looks like, and any important details.
-                           Example: "handmade lavender soap bar with dried flowers on top"
-                           Example: "ceramic coffee mug in navy blue with gold rim"
-                           Example: "organic honey jar with wooden dipper"
-        scene_description: Describe the setting or background (optional).
-                         Where do you want your product? What's around it?
-                         Example: "on a white background"
-                         Example: "on a wooden table with morning sunlight"
-                         Example: "surrounded by fresh ingredients"
-                         Example: "in a cozy kitchen setting"
-                         Leave empty for a clean, simple background.
-
-    Returns:
-        dict with keys:
-            - 'tool_response_artifact_id': artifact ID for the generated image
-            - 'prompt': The full prompt used for generation
-            - 'status': Success or error status
-            - 'message': Additional information or error details
-
-    Examples:
-        # Simple product photo with clean background
-        result = await generate_product_asset(
-            product_description="handmade candle in glass jar with wooden wick",
-            scene_description="clean white background"
-        )
-
-        # Product in a lifestyle setting
-        result = await generate_product_asset(
-            product_description="organic coffee beans in kraft paper bag",
-            scene_description="on rustic wooden table with morning light, coffee cup nearby"
-        )
-        
-        # Just the product description works too!
-        result = await generate_product_asset(
-            product_description="handcrafted leather wallet in brown"
-        )
-    """
-    # Build comprehensive prompt from parameters
-    prompt_parts = [product_description]
-
-    if scene_description:
-        prompt_parts.append(f"Setting: {scene_description}")
-
-    # Add professional quality markers
-    prompt_parts.append(
-        "Professional product photography, high quality, well-lit, "
-        "sharp focus, clean and appealing, suitable for business use"
-    )
-
-    full_prompt = ". ".join(prompt_parts)
-
-    try:
-        response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[full_prompt],
-        )
-
-        artifact_id = ""
-        for part in response.candidates[0].content.parts:
-            if part.inline_data is not None:
-                artifact_id = f"generated_img_{tool_context.function_call_id}.png"
-
-                await tool_context.save_artifact(filename=artifact_id, artifact=part)
-
-        return {
-            "status": "success",
-            "prompt": full_prompt,
-            "tool_response_artifact_id": artifact_id,
-            "message": "Image generated successfully"
-            if artifact_id
-            else "No image generated",
-        }
-    except Exception as e:
-        logging.error(e)
-        return {
-            "status": "error",
-            "prompt": full_prompt,
-            "tool_response_artifact_id": "",
-            "message": f"Error generating image: {str(e)}",
-        }
-
-
 async def edit_product_asset(
     tool_context: ToolContext,
     change_description: str,
-    image_artifact_id: str | list[str] = None,
+    image_artifact_ids: list = [],
 ) -> dict[str, str]:
     """Modify an existing product photo or combine multiple product photos.
 
@@ -120,92 +25,94 @@ async def edit_product_asset(
     - Edit a single photo (change background, lighting, colors, etc.)
     - Combine multiple products into one photo (arrange them side by side, create bundles, etc.)
 
-    **IMPORTANT**: Make ONE change at a time. If you want multiple changes, we'll do
-    them one by one.
+    **IMPORTANT**: 
+    - Make ONE change at a time. If you want multiple changes, do them one by one.
+    - BE AS DETAILED AS POSSIBLE in the change_description for best results!
 
     Args:
-        change_description: What do you want to do? Be specific!
+        change_description: What do you want to do? BE VERY DETAILED AND SPECIFIC!
+                          
+                          **The more details you provide, the better the result.**
+                          Include specifics about colors, positions, lighting, style, mood, etc.
+                          
                           For single image edits:
-                          - "change the background to white"
-                          - "add some flowers around the product"
-                          - "make the lighting brighter"
-                          - "remove the cup from the background"
-                          - "change the product color to blue"
+                          - GOOD: "change the background to pure white, clean and minimal"
+                          - BETTER: "change to soft white background with subtle gradient, studio lighting"
+                          - GOOD: "add some flowers around the product"
+                          - BETTER: "add fresh pink roses and eucalyptus leaves arranged naturally around the product on the left and right sides"
+                          - GOOD: "make the lighting brighter"
+                          - BETTER: "increase brightness with soft natural window light from the left, creating gentle shadows"
                           
                           For multiple images:
-                          - "arrange these products side by side on white background"
-                          - "create a product bundle with all items together"
-                          - "put these products on a wooden table"
-                          - "show these items arranged nicely for a gift set"
-        image_artifact_id: The ID(s) of the image(s) to edit.
-                         - For single image: provide a string (e.g., "product.png")
-                         - For multiple images: provide a list of strings (e.g., ["product1.png", "product2.png"])
-                         Use multiple images to combine products into one photo.
+                          - GOOD: "arrange these products side by side"
+                          - BETTER: "arrange these three products in a horizontal line on a white marble surface, evenly spaced, with soft natural lighting from above"
+                          - GOOD: "create a product bundle"
+                          - BETTER: "create an elegant spa gift set arrangement with products centered, surrounded by fresh eucalyptus leaves and soft white towels, on a light wood surface"
+                          
+                          Always include: positioning, spacing, lighting direction, background details, mood/style
+        image_artifact_ids: List of image IDs to edit or combine.
+                          - For single image: provide a list with one item (e.g., ["product.png"])
+                          - For multiple images: provide a list with multiple items (e.g., ["product1.png", "product2.png"])
+                          Use multiple images to combine products into one photo.
 
     Returns:
         dict with keys:
             - 'tool_response_artifact_id': Artifact ID for the edited image
-            - 'tool_input_artifact_id': Artifact ID(s) of the original image(s)
+            - 'tool_input_artifact_ids': Comma-separated list of input artifact IDs
             - 'edit_prompt': The full edit prompt used
             - 'status': Success or error status
             - 'message': Additional information or error details
 
     Examples:
-        # Edit a single image - change the background
+        # Edit a single image - change the background (DETAILED!)
         result = await edit_product_asset(
-            change_description="change background to white",
-            image_artifact_id="product_shot_123.png"
+            change_description="change background to soft pure white with subtle gradient, studio lighting from top, clean and minimal aesthetic",
+            image_artifact_ids=["product_shot_123.png"]
         )
 
-        # Add something to the scene
+        # Add something to the scene (DETAILED!)
         result = await edit_product_asset(
-            change_description="add fresh leaves around the product",
-            image_artifact_id="skincare_789.png"
+            change_description="add fresh green eucalyptus leaves and sprigs arranged naturally around the product on both sides, with water droplets, on a white marble surface",
+            image_artifact_ids=["skincare_789.png"]
         )
 
-        # Combine multiple products together
+        # Combine multiple products together (DETAILED!)
         result = await edit_product_asset(
-            change_description="arrange these three candles side by side on white background",
-            image_artifact_id=["candle1.png", "candle2.png", "candle3.png"]
+            change_description="arrange these three candles in a perfect horizontal line on a clean white background, evenly spaced with 2 inches between each, soft diffused lighting from above creating subtle shadows",
+            image_artifact_ids=["candle1.png", "candle2.png", "candle3.png"]
         )
         
-        # Create a product bundle
+        # Create a product bundle (DETAILED!)
         result = await edit_product_asset(
-            change_description="create a spa gift set with all items arranged nicely",
-            image_artifact_id=["lotion.png", "soap.png", "scrub.png"]
+            change_description="create an elegant spa gift set with items arranged in a semi-circle on light oak wood surface, surrounded by fresh lavender sprigs and white fluffy towels, warm natural window light from the left, relaxing and luxurious mood",
+            image_artifact_ids=["lotion.png", "soap.png", "scrub.png"]
         )
 
-        # Make multiple changes by doing them one at a time
+        # Make multiple changes by doing them one at a time (DETAILED!)
         result1 = await edit_product_asset(
-            change_description="change background to wooden table",
-            image_artifact_id="product_original.png"
+            change_description="change background to rustic dark wood table with natural grain texture visible, warm brown tones",
+            image_artifact_ids=["product_original.png"]
         )
         # Use the result from the first edit
         result2 = await edit_product_asset(
-            change_description="add soft natural lighting",
-            image_artifact_id=result1["tool_response_artifact_id"]
+            change_description="add soft warm natural morning light from the left side at 45 degree angle, creating gentle shadows on the right, cozy and inviting atmosphere",
+            image_artifact_ids=[result1["tool_response_artifact_id"]]
         )
     """
     try:
-        # Normalize input to list
-        if image_artifact_id is None:
+        # Validate input
+        if not image_artifact_ids:
             return {
                 "status": "error",
                 "tool_response_artifact_id": "",
-                "tool_input_artifact_id": "",
+                "tool_input_artifact_ids": "",
                 "edit_prompt": change_description,
-                "message": "No images provided. Please provide image_artifact_id.",
+                "message": "No images provided. Please provide image_artifact_ids as a list.",
             }
-        
-        # Convert single string to list for uniform handling
-        if isinstance(image_artifact_id, str):
-            image_ids = [image_artifact_id]
-        else:
-            image_ids = image_artifact_id
         
         # Load all images
         image_artifacts = []
-        for img_id in image_ids:
+        for img_id in image_artifact_ids:
             artifact = await tool_context.load_artifact(filename=img_id)
             image_artifacts.append(artifact)
         
@@ -233,12 +140,13 @@ async def edit_product_asset(
         )
 
         artifact_id = ""
+        logging.info("Gemini Flash Image: response.candidates: ", response.candidates)
         for part in response.candidates[0].content.parts:
             if part.inline_data is not None:
                 artifact_id = f"edited_img_{tool_context.function_call_id}.png"
                 await tool_context.save_artifact(filename=artifact_id, artifact=part)
 
-        input_ids_str = ", ".join(image_ids)
+        input_ids_str = ", ".join(image_artifact_ids)
         return {
             "status": "success",
             "tool_response_artifact_id": artifact_id,
@@ -248,7 +156,7 @@ async def edit_product_asset(
         }
     except Exception as e:
         logging.error(e)
-        input_ids_str = ", ".join(image_ids) if 'image_ids' in locals() else ""
+        input_ids_str = ", ".join(image_artifact_ids) if image_artifact_ids else ""
         return {
             "status": "error",
             "tool_response_artifact_id": "",
