@@ -21,7 +21,7 @@ async def before_model_modifier(
                     part, callback_context
                 )
             # Handle function response parts for image generation/editing
-            elif part.function_response :  
+            elif part.function_response:
                 if part.function_response.name in [
                     "edit_product_asset",
                 ]:
@@ -37,6 +37,7 @@ async def before_model_modifier(
             modified_parts.extend(processed_parts)
 
         content.parts = modified_parts
+
 
 async def _process_inline_data_part(
     part: Part, callback_context: CallbackContext
@@ -78,6 +79,7 @@ def _generate_artifact_id(part: Part) -> str:
     extension = mime_type.split("/")[-1]
 
     return f"usr_upl_img_{content_hash}.{extension}"
+
 
 async def _process_function_response_part(
     part: Part, callback_context: CallbackContext

@@ -41,12 +41,12 @@ async def edit_product_asset(
                           - "replace background with rustic dark wood table surface with natural grain texture visible, warm brown tones"
 
                           For ADDING PROPS:
-                          - "add fresh pink roses and eucalyptus leaves arranged naturally around the product on the left and right sides, 
+                          - "add fresh pink roses and eucalyptus leaves arranged naturally around the product on the left and right sides,
                             with some petals scattered in front"
                           - "add fresh basil leaves and cherry tomatoes scattered around the product naturally"
 
                           For LIGHTING changes:
-                          - "add soft natural window light coming from the left side at 45 degree angle, creating gentle shadows on the 
+                          - "add soft natural window light coming from the left side at 45 degree angle, creating gentle shadows on the
                             right side, warm morning atmosphere"
                           - "increase brightness with soft diffused studio lighting from above, eliminating harsh shadows"
 
@@ -54,7 +54,7 @@ async def edit_product_asset(
                           - "reposition product to be perfectly centered in frame with equal space on all sides"
                           - "arrange these three products in a horizontal line, evenly spaced with 2 inches between each"
 
-                          Note: When combining multiple products, you can include background/lighting in the initial arrangement since it's 
+                          Note: When combining multiple products, you can include background/lighting in the initial arrangement since it's
                                 one cohesive setup
         image_artifact_ids: List of image IDs to edit or combine.
                           - For single image: provide a list with one item (e.g., ["product.png"])
@@ -68,50 +68,6 @@ async def edit_product_asset(
             - 'edit_prompt': The full edit prompt used
             - 'status': Success or error status
             - 'message': Additional information or error details
-
-    Examples:
-        # Example 1: BACKGROUND change only
-        result = await edit_product_asset(
-            change_description="change background to soft pure white with subtle gradient from top to bottom, clean and minimal aesthetic",
-            image_artifact_ids=["product_shot_123.png"]
-        )
-
-        # Example 2: ADD PROPS only
-        result = await edit_product_asset(
-            change_description="add fresh green eucalyptus leaves and sprigs arranged naturally around the product on both sides, with water droplets",
-            image_artifact_ids=["skincare_789.png"]
-        )
-
-        # Example 3: LIGHTING change only
-        result = await edit_product_asset(
-            change_description="add soft natural window light coming from the left side at 45 degree angle, creating gentle shadows on the right, warm morning atmosphere",
-            image_artifact_ids=["candle_123.png"]
-        )
-
-        # Example 4: ARRANGEMENT (combining multiple products - can include cohesive setup details)
-        result = await edit_product_asset(
-            change_description="arrange these three candles in a perfect horizontal line, centered in frame, evenly spaced with 2 inches between each, on a clean white background with soft diffused lighting from above",
-            image_artifact_ids=["candle1.png", "candle2.png", "candle3.png"]
-        )
-
-        # Example 5: Chaining multiple edits for complex results
-        # Step 1: Change background
-        result1 = await edit_product_asset(
-            change_description="change background to rustic dark wood table with natural grain texture visible, warm brown tones",
-            image_artifact_ids=["product_original.png"]
-        )
-
-        # Step 2: Add lighting (using result from step 1)
-        result2 = await edit_product_asset(
-            change_description="add soft warm natural morning light from the left side at 45 degree angle, creating gentle shadows on the right, cozy and inviting atmosphere",
-            image_artifact_ids=[result1["tool_response_artifact_id"]]
-        )
-
-        # Step 3: Add props (using result from step 2)
-        result3 = await edit_product_asset(
-            change_description="add fresh lavender sprigs and dried flowers arranged naturally on the left and right sides of the product",
-            image_artifact_ids=[result2["tool_response_artifact_id"]]
-        )
     """
     try:
         # Validate input
