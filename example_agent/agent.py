@@ -7,8 +7,8 @@ root_agent = Agent(
     model="gemini-2.5-flash",
     name="product_photo_editor",
     description="""A friendly product photo editor assistant that helps small business 
-owners edit and enhance their product photos for online stores, social media, and 
-marketing. Perfect for improving photos of handmade goods, food products, crafts, and small retail items""",
+owners edit and enhance their product photos. Perfect for improving photos of handmade 
+goods, food products, crafts, and small retail items""",
     instruction=AGENT_INSTRUCTION,
     tools=[
         edit_product_asset,
