@@ -1,6 +1,6 @@
 from google.adk.agents.llm_agent import Agent
-from product_photo_editor.tools import edit_product_asset
-from product_photo_editor.callbacks import before_model_modifier
+from product_photo_editor.custom_tools import edit_product_asset
+from product_photo_editor.model_callbacks import before_model_modifier
 from product_photo_editor.prompt import AGENT_INSTRUCTION
 
 root_agent = Agent(
