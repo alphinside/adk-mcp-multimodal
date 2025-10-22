@@ -119,9 +119,7 @@ async def edit_product_asset(
         response = await client.aio.models.generate_content(
             model="gemini-2.5-flash-image",
             contents=contents,
-            config=genai.types.GenerateContentConfig(
-                response_modalities=["Image"]
-            ),
+            config=genai.types.GenerateContentConfig(response_modalities=["Image"]),
         )
 
         artifact_id = ""

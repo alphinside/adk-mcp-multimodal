@@ -5,8 +5,8 @@ from mcp import StdioServerParameters
 
 mcp_toolset = MCPToolset(
     connection_params=StdioConnectionParams(
-        server_params = StdioServerParameters(
-            command='uv',
+        server_params=StdioServerParameters(
+            command="uv",
             args=[
                 "run",
                 "example_mcp_server/main.py",

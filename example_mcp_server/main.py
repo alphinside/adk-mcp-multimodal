@@ -1,9 +1,7 @@
 from fastmcp import FastMCP
-from typing import Annotated, Optional
+from typing import Annotated
 from pydantic import Field
 import base64
-import io
-import time
 import asyncio
 import os
 from google import genai
@@ -16,6 +14,44 @@ load_dotenv()
 
 mcp = FastMCP("Veo MCP Server")
 
+
+def enrich_prompt_for_marketing(user_prompt: str) -> str:
+    """Enriches user prompt with professional video production quality enhancements.
+
+    Adds cinematic quality, professional lighting, smooth camera work, and marketing-focused
+    elements to ensure high-quality product marketing videos.
+    """
+    enhancement_prefix = """Create a high-quality, professional product marketing video with the following characteristics:
+
+TECHNICAL SPECIFICATIONS:
+- 4K cinematic quality with professional color grading
+- Smooth, stabilized camera movements
+- Professional studio lighting setup with soft, even illumination
+- Shallow depth of field for product focus
+- High dynamic range (HDR) for vibrant colors
+
+VISUAL STYLE:
+- Clean, minimalist aesthetic suitable for premium brand marketing
+- Elegant and sophisticated presentation
+- Commercial-grade production quality
+- Attention to detail in product showcase
+
+USER'S SPECIFIC REQUIREMENTS:
+"""
+
+    enhancement_suffix = """
+
+ADDITIONAL QUALITY GUIDELINES:
+- Ensure smooth transitions and natural motion
+- Maintain consistent lighting throughout
+- Keep the product as the clear focal point
+- Use professional camera techniques (slow pans, tracking shots, or dolly movements)
+- Apply subtle motion blur for cinematic feel
+- Ensure brand-appropriate tone and style"""
+
+    return f"{enhancement_prefix}{user_prompt}{enhancement_suffix}"
+
+
 @mcp.tool
 async def generate_video_with_image(
     prompt: Annotated[
@@ -26,7 +62,7 @@ async def generate_video_with_image(
     ],
     model: Annotated[
         str, Field(description="Veo model to use")
-    ] = "veo-3.1-fast-generate-preview",
+    ] = "veo-3.1-generate-preview",
     negative_prompt: Annotated[
         str | None,
         Field(description="Things to avoid in the generated video"),
@@ -35,22 +71,34 @@ async def generate_video_with_image(
         int, Field(description="Video duration in seconds (4, 6, or 8)")
     ] = 4,
 ) -> dict:
-    """Generates a video from text prompt and a starting image using Google's Veo API.
+    """Generates a professional product marketing video from text prompt and starting image using Google's Veo API.
 
-    This function uses an image as the first frame of the generated video.
+    This function uses an image as the first frame of the generated video and automatically
+    enriches your prompt with professional video production quality guidelines to create
+    high-quality marketing assets suitable for commercial use.
 
-    IMPORTANT: The prompt must be as detailed as possible for best results. Include:
-    - Camera movements (e.g., "panning", "tracking shot", "close-up")
-    - Lighting and mood (e.g., "cinematic", "soft lighting", "golden hour")
-    - Subject appearance and actions (e.g., detailed descriptions of what's happening)
-    - Environment and atmosphere details
+    AUTOMATIC ENHANCEMENTS APPLIED:
+    - 4K cinematic quality with professional color grading
+    - Smooth, stabilized camera movements
+    - Professional studio lighting setup
+    - Shallow depth of field for product focus
+    - Commercial-grade production quality
+    - Marketing-focused visual style
+
+    PROMPT WRITING TIPS:
+    Describe what you want to see in the video. Focus on:
+    - Product actions/movements (e.g., "rotating slowly", "zooming into details")
+    - Desired camera angles (e.g., "close-up of the product", "wide shot")
+    - Background/environment (e.g., "minimalist white backdrop", "lifestyle setting")
+    - Any specific details about the product presentation
+
+    The system will automatically enhance your prompt with professional production quality.
 
     Args:
-        prompt: VERY DETAILED text description of the video to generate. Be specific about
-                camera angles, movements, lighting, subject actions, and environment.
-                More detail = better results.
+        prompt: Description of the video to generate. Focus on the core product presentation
+                you want. The system will automatically add professional quality enhancements.
         image_data: Base64-encoded image data to use as the starting frame
-        model: Veo model name (default: veo-3.1-fast-generate-preview)
+        model: Veo model name (default: veo-3.1-generate-preview)
         negative_prompt: Optional prompt describing what to avoid in the video
         duration_seconds: Video length (4, 6, or 8 seconds)
 
@@ -59,7 +107,6 @@ async def generate_video_with_image(
             - status: 'success' or 'error'
             - message: Description of the result
             - video_data: Base64-encoded video data (on success only)
-            - video_path: Path to saved video file for debugging (on success only)
     """
     try:
         # Initialize the Gemini client
@@ -69,33 +116,36 @@ async def generate_video_with_image(
             location=os.getenv("GOOGLE_CLOUD_LOCATION"),
         )
 
-
         # Decode the image
         image_bytes = base64.b64decode(image_data)
         print(f"Successfully decoded image data: {len(image_bytes)} bytes")
-        
+
         # Create image object
         image = types.Image(image_bytes=image_bytes, mime_type="image/png")
-        
+
         # Prepare the config
         config = types.GenerateVideosConfig(
             duration_seconds=duration_seconds,
             number_of_videos=1,
         )
-        
+
         if negative_prompt:
             config.negative_prompt = negative_prompt
-        
-        print(f"Starting video generation with image and prompt: {prompt[:100]}...")
-        
+
+        # Enrich the prompt for professional marketing quality
+        enriched_prompt = enrich_prompt_for_marketing(prompt)
+        print("Starting video generation with enriched prompt...")
+        print(f"Original prompt: {prompt[:100]}...")
+        print(f"Enriched prompt length: {len(enriched_prompt)} characters")
+
         # Generate the video (async operation)
         operation = client.models.generate_videos(
             model=model,
-            prompt=prompt,
+            prompt=enriched_prompt,
             image=image,
             config=config,
         )
-        
+
         # Poll until the operation is complete
         poll_count = 0
         while not operation.done:
@@ -103,31 +153,28 @@ async def generate_video_with_image(
             print(f"Waiting for video generation to complete... (poll {poll_count})")
             await asyncio.sleep(5)
             operation = client.operations.get(operation)
-        
+
         # Download the video and convert to base64
         video = operation.response.generated_videos[0]
-        
-        # Save video to file for debugging
-        output_path = f"generated_video_{int(time.time())}.mp4"
-        video.video.save(output_path)
-        print(f"Video saved to {output_path} for debugging")
-        
+
         # Get video bytes and encode to base64
         video_bytes = video.video.video_bytes
         video_base64 = base64.b64encode(video_bytes).decode("utf-8")
-        
+
         print(f"Video generated successfully: {len(video_bytes)} bytes")
-        
+
         return {
             "status": "success",
             "message": f"Video with image generated successfully after {poll_count * 5} seconds",
-            # "video_data": video_base64,
-            # "video_path": output_path,
+            "video_data": video_base64,
         }
     except Exception as e:
-        breakpoint()
         logging.error(e)
-        return {"status": "error", "message": f"Error generating video with image: {str(e)}"}
+        return {
+            "status": "error",
+            "message": f"Error generating video with image: {str(e)}",
+        }
+
 
 if __name__ == "__main__":
     mcp.run()
