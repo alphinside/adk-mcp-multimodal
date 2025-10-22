@@ -35,9 +35,15 @@ This demo showcases how to implement **multimodal tool interaction flow in ADK**
 
 ## How to Run
 
-- Copy the `creative_product_designer_agent/.env.example` file to `creative_product_designer_agent/.env` and fill in the values
+1. Rename `example_agent` dir to `product_photo_editor`
 
-- Run the agent using the following command:
+2. Copy the `product_photo_editor/.env.example` file to `product_photo_editor/.env` and fill in the values
+
+3. Rename `example_mcp_server` dir to `veo_mcp`
+
+4. Copy the `veo_mcp/.env.example` file to `veo_mcp/.env` and fill in the values
+
+5. Run the agent using the following command:
 
     ```shell
     uv run adk web

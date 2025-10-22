@@ -25,7 +25,7 @@ mcp_toolset = MCPToolset(
             command="uv",
             args=[
                 "run",
-                "example_mcp_server/main.py",
+                "veo_mcp/main.py",
             ],
         ),
         timeout=120,
