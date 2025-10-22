@@ -1,3 +1,19 @@
+"""
+Copyright 2025 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from fastmcp import FastMCP
 from typing import Annotated
 from pydantic import Field
@@ -67,9 +83,6 @@ async def generate_video_with_image(
         str | None,
         Field(description="Things to avoid in the generated video"),
     ] = None,
-    duration_seconds: Annotated[
-        int, Field(description="Video duration in seconds (4, 6, or 8)")
-    ] = 4,
 ) -> dict:
     """Generates a professional product marketing video from text prompt and starting image using Google's Veo API.
 
@@ -100,7 +113,6 @@ async def generate_video_with_image(
         image_data: Base64-encoded image data to use as the starting frame
         model: Veo model name (default: veo-3.1-generate-preview)
         negative_prompt: Optional prompt describing what to avoid in the video
-        duration_seconds: Video length (4, 6, or 8 seconds)
 
     Returns:
         dict: A dictionary containing:
@@ -125,7 +137,7 @@ async def generate_video_with_image(
 
         # Prepare the config
         config = types.GenerateVideosConfig(
-            duration_seconds=duration_seconds,
+            duration_seconds=8,
             number_of_videos=1,
         )
 
@@ -134,9 +146,6 @@ async def generate_video_with_image(
 
         # Enrich the prompt for professional marketing quality
         enriched_prompt = enrich_prompt_for_marketing(prompt)
-        print("Starting video generation with enriched prompt...")
-        print(f"Original prompt: {prompt[:100]}...")
-        print(f"Enriched prompt length: {len(enriched_prompt)} characters")
 
         # Generate the video (async operation)
         operation = client.models.generate_videos(
@@ -166,6 +175,7 @@ async def generate_video_with_image(
         return {
             "status": "success",
             "message": f"Video with image generated successfully after {poll_count * 5} seconds",
+            "complete_prompt": enriched_prompt,
             "video_data": video_base64,
         }
     except Exception as e:
