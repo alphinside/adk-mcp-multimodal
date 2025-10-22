@@ -101,14 +101,16 @@ async def edit_product_asset(
             full_edit_prompt = (
                 f"{change_description}. "
                 f"Combine these {len(image_artifacts)} product images together. "
-                "Keep all products looking good and professional. "
-                "Make natural, appealing composition suitable for business use."
+                "IMPORTANT: Preserve each product's original appearance, shape, color, and design as faithfully as possible. "
+                "Only modify for aesthetic enhancements (lighting, background, composition) or viewing angle adjustments. "
+                "Do not alter the core product features, branding, or characteristics."
             )
         else:
             full_edit_prompt = (
                 f"{change_description}. "
-                "Keep the product looking good and professional. "
-                "Make natural, appealing changes suitable for business use."
+                "IMPORTANT: Preserve the product's original appearance, shape, color, and design as faithfully as possible. "
+                "Only modify for aesthetic enhancements (lighting, background, composition) or viewing angle adjustments. "
+                "Do not alter the core product features, branding, or characteristics."
             )
 
         # Build contents list: all images followed by the prompt
@@ -117,6 +119,9 @@ async def edit_product_asset(
         response = await client.aio.models.generate_content(
             model="gemini-2.5-flash-image",
             contents=contents,
+            config=genai.types.GenerateContentConfig(
+                response_modalities=["Image"]
+            ),
         )
 
         artifact_id = ""

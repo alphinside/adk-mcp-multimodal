@@ -2,7 +2,7 @@
 
 > **⚠️ DISCLAIMER: THIS IS NOT AN OFFICIALLY SUPPORTED GOOGLE PRODUCT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.**
 
-This demo showcases how to implement **multimodal tool interaction flow in ADK** using a creative product designer agent use case. In this use case, the agent can refer to the user-uploaded images and perform the required edits by referencing the artifact identifier which is given as context in the model callback. Furthermore, the tool also can produce multimodal data and save it as artifact to be used in the conversation context.
+This demo showcases how to implement **multimodal tool interaction flow in ADK** using a creative product photo editor agent use case. In this use case, the agent can refer to the user-uploaded images and perform the required edits by referencing the artifact identifier which is given as context in the model callback. Furthermore, the tool also can produce multimodal data and save it as artifact to be used in the conversation context.
 
 ## Prerequisites
 
