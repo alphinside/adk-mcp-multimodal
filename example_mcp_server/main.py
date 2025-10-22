@@ -76,9 +76,6 @@ async def generate_video_with_image(
     image_data: Annotated[
         str, Field(description="Base64-encoded image data to use as starting frame")
     ],
-    model: Annotated[
-        str, Field(description="Veo model to use")
-    ] = "veo-3.1-generate-preview",
     negative_prompt: Annotated[
         str | None,
         Field(description="Things to avoid in the generated video"),
@@ -111,7 +108,6 @@ async def generate_video_with_image(
         prompt: Description of the video to generate. Focus on the core product presentation
                 you want. The system will automatically add professional quality enhancements.
         image_data: Base64-encoded image data to use as the starting frame
-        model: Veo model name (default: veo-3.1-generate-preview)
         negative_prompt: Optional prompt describing what to avoid in the video
 
     Returns:
@@ -149,7 +145,7 @@ async def generate_video_with_image(
 
         # Generate the video (async operation)
         operation = client.models.generate_videos(
-            model=model,
+            model="veo-3.1-generate-preview",
             prompt=enriched_prompt,
             image=image,
             config=config,
