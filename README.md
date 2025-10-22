@@ -35,7 +35,7 @@ This demo showcases how to implement **multimodal tool interaction flow in ADK**
 
 ## How to Run
 
-1. Rename `example_agent` dir to `product_photo_editor`
+1. Rename `example_full_agent` dir to `product_photo_editor`
 
 2. Copy the `product_photo_editor/.env.example` file to `product_photo_editor/.env` and fill in the values
 
