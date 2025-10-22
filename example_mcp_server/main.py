@@ -121,8 +121,8 @@ async def generate_video_with_image(
         return {
             "status": "success",
             "message": f"Video with image generated successfully after {poll_count * 5} seconds",
-            "video_data": video_base64,
-            "video_path": output_path,
+            # "video_data": video_base64,
+            # "video_path": output_path,
         }
     except Exception as e:
         breakpoint()
@@ -130,4 +130,4 @@ async def generate_video_with_image(
         return {"status": "error", "message": f"Error generating video with image: {str(e)}"}
 
 if __name__ == "__main__":
-    mcp.run(transport="http", host="0.0.0.0", port=8000)
+    mcp.run()
