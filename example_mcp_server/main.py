@@ -31,43 +31,6 @@ load_dotenv()
 mcp = FastMCP("Veo MCP Server")
 
 
-def enrich_prompt_for_marketing(user_prompt: str) -> str:
-    """Enriches user prompt with professional video production quality enhancements.
-
-    Adds cinematic quality, professional lighting, smooth camera work, and marketing-focused
-    elements to ensure high-quality product marketing videos.
-    """
-    enhancement_prefix = """Create a high-quality, professional product marketing video with the following characteristics:
-
-TECHNICAL SPECIFICATIONS:
-- 4K cinematic quality with professional color grading
-- Smooth, stabilized camera movements
-- Professional studio lighting setup with soft, even illumination
-- Shallow depth of field for product focus
-- High dynamic range (HDR) for vibrant colors
-
-VISUAL STYLE:
-- Clean, minimalist aesthetic suitable for premium brand marketing
-- Elegant and sophisticated presentation
-- Commercial-grade production quality
-- Attention to detail in product showcase
-
-USER'S SPECIFIC REQUIREMENTS:
-"""
-
-    enhancement_suffix = """
-
-ADDITIONAL QUALITY GUIDELINES:
-- Ensure smooth transitions and natural motion
-- Maintain consistent lighting throughout
-- Keep the product as the clear focal point
-- Use professional camera techniques (slow pans, tracking shots, or dolly movements)
-- Apply subtle motion blur for cinematic feel
-- Ensure brand-appropriate tone and style"""
-
-    return f"{enhancement_prefix}{user_prompt}{enhancement_suffix}"
-
-
 @mcp.tool
 async def generate_video_with_image(
     prompt: Annotated[
@@ -180,6 +143,43 @@ async def generate_video_with_image(
             "status": "error",
             "message": f"Error generating video with image: {str(e)}",
         }
+
+
+def enrich_prompt_for_marketing(user_prompt: str) -> str:
+    """Enriches user prompt with professional video production quality enhancements.
+
+    Adds cinematic quality, professional lighting, smooth camera work, and marketing-focused
+    elements to ensure high-quality product marketing videos.
+    """
+    enhancement_prefix = """Create a high-quality, professional product marketing video with the following characteristics:
+
+TECHNICAL SPECIFICATIONS:
+- 4K cinematic quality with professional color grading
+- Smooth, stabilized camera movements
+- Professional studio lighting setup with soft, even illumination
+- Shallow depth of field for product focus
+- High dynamic range (HDR) for vibrant colors
+
+VISUAL STYLE:
+- Clean, minimalist aesthetic suitable for premium brand marketing
+- Elegant and sophisticated presentation
+- Commercial-grade production quality
+- Attention to detail in product showcase
+
+USER'S SPECIFIC REQUIREMENTS:
+"""
+
+    enhancement_suffix = """
+
+ADDITIONAL QUALITY GUIDELINES:
+- Ensure smooth transitions and natural motion
+- Maintain consistent lighting throughout
+- Keep the product as the clear focal point
+- Use professional camera techniques (slow pans, tracking shots, or dolly movements)
+- Apply subtle motion blur for cinematic feel
+- Ensure brand-appropriate tone and style"""
+
+    return f"{enhancement_prefix}{user_prompt}{enhancement_suffix}"
 
 
 if __name__ == "__main__":
