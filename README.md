@@ -11,6 +11,10 @@ This demo showcases how to implement **multimodal tool interaction flow in ADK**
 - **Multimodal Context**: Seamlessly reference and work with both image and video artifacts throughout the conversation
 - **Automatic Prompt Enrichment**: User prompts are automatically enhanced with professional production quality guidelines for marketing-ready videos
 
+![Photo Editing](assets/photo_editing.gif)
+
+![Video Generation](assets/video_creation.gif)
+
 ## Prerequisites
 
 - If you are executing this project from your local IDE, Login to Gcloud using CLI with the following command :
