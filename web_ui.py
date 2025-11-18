@@ -26,28 +26,29 @@ from google.adk.events import Event
 from typing import AsyncIterator
 from google.genai import types
 from pprint import pformat
+from gradio.data_classes import FileData
+import shutil
 
-APP_NAME = "photo_editor_app"   
+APP_NAME = "photo_editor_app"
 USER_ID = "default_user"
 SESSION_ID = "default_session"
 SESSION_SERVICE = InMemorySessionService()
 ARTIFACT_SERVICE = InMemoryArtifactService()
+
+# Create fresh artifacts directory (delete if exists)
+GRADIO_ARTIFACT_DIR = Path("gradio_artifacts")
+if GRADIO_ARTIFACT_DIR.exists():
+    shutil.rmtree(GRADIO_ARTIFACT_DIR)
+    print(f"🗑️  Deleted existing artifacts directory: {GRADIO_ARTIFACT_DIR}")
+GRADIO_ARTIFACT_DIR.mkdir(exist_ok=True)
+print(f"📁 Created fresh artifacts directory: {GRADIO_ARTIFACT_DIR}")
+
 PHOTO_EDITOR_AGENT_RUNNER = Runner(
     agent=photo_editor_agent,  # The agent we want to run
     app_name=APP_NAME,  # Associates runs with our app
     session_service=SESSION_SERVICE,  # Uses our session manager
-    artifact_service= ARTIFACT_SERVICE,  # Uses our artifact manager
+    artifact_service=ARTIFACT_SERVICE,  # Uses our artifact manager
 )
-
-async def initialize_session_if_not_exists():
-    """Ensure session exists before agent runs."""
-    if await SESSION_SERVICE.get_session(
-        app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
-    ) is None:
-        await SESSION_SERVICE.create_session(
-            app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
-        )
-
 
 
 async def get_response_from_agent(
@@ -64,86 +65,162 @@ async def get_response_from_agent(
         Text response from the backend service.
     """
     await initialize_session_if_not_exists()
-    
-    try:
-        # Build parts list from message
-        parts = []
-        text_content = message.get("text", "")
-        files = message.get("files", [])
-        
-        if text_content:
-            parts.append(types.Part(text=text_content))
-        
-        for file_path in files:
-            mime_type, _ = mimetypes.guess_type(file_path)
-            
-            if mime_type and mime_type.startswith("image/"):
-                with open(file_path, "rb") as f:
-                    image_bytes = f.read()
-                
-                parts.append(
-                    types.Part(
-                        inline_data=types.Blob(
-                            mime_type=mime_type,
-                            data=image_bytes
+
+    # Build message parts from text and files
+    parts = build_message_parts(message)
+
+    events_iterator: AsyncIterator[Event] = PHOTO_EDITOR_AGENT_RUNNER.run_async(
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+        new_message=types.Content(role="user", parts=parts),
+    )
+
+    responses = []
+    async for event in events_iterator:  # event has type Event
+        if event.content.parts:
+            for part in event.content.parts:
+                if part.function_call:
+                    formatted_call = f"```python\n{pformat(part.function_call.model_dump(), indent=2, width=80)}\n```"
+                    responses.append(
+                        gr.ChatMessage(
+                            role="assistant",
+                            content=f"{part.function_call.name}:\n{formatted_call}",
+                            metadata={"title": "🛠️ Tool Call"},
                         )
                     )
-                )
-        
-        events_iterator: AsyncIterator[Event] = PHOTO_EDITOR_AGENT_RUNNER.run_async(
-            user_id=USER_ID,
-            session_id=SESSION_ID,
-            new_message=types.Content(role="user", parts=parts),
+                elif part.function_response:
+                    formatted_response = f"```python\n{pformat(part.function_response.model_dump(), indent=2, width=80)}\n```"
+
+                    # Capture artifact delta from function response
+                    artifact_delta = event.actions.artifact_delta
+
+                    for artifact_name in artifact_delta.keys():
+                        artifact = await ARTIFACT_SERVICE.load_artifact(
+                            app_name=APP_NAME,
+                            user_id=USER_ID,
+                            session_id=SESSION_ID,
+                            filename=artifact_name,
+                        )
+
+                        artifact_bytes = artifact.inline_data.data
+                        mime_type = artifact.inline_data.mime_type
+
+                        # Write artifact to Gradio directory
+                        artifact_file_path = write_artifact_to_gradio_dir(
+                            artifact_bytes, mime_type, artifact_name
+                        )
+
+                        responses.append(
+                            gr.ChatMessage(
+                                role="assistant",
+                                content=FileData(
+                                    path=artifact_file_path, mime_type=mime_type
+                                ),
+                                metadata={"title": "📥 Generated Artifact"},
+                            )
+                        )
+
+                    responses.append(
+                        gr.ChatMessage(
+                            role="assistant",
+                            content=formatted_response,
+                            metadata={"title": "⚡ Tool Response"},
+                        )
+                    )
+                else:
+                    responses.append(
+                        gr.ChatMessage(
+                            role="assistant",
+                            content=part.text,
+                        )
+                    )
+
+                yield responses
+
+
+async def initialize_session_if_not_exists():
+    """Ensure session exists before agent runs."""
+    if (
+        await SESSION_SERVICE.get_session(
+            app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
+        )
+        is None
+    ):
+        await SESSION_SERVICE.create_session(
+            app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
         )
 
-        responses = []
-        async for event in events_iterator:  # event has type Event
-            if event.content.parts:
-                for part in event.content.parts:
-                    if part.function_call:
-                        formatted_call = f"```python\n{pformat(part.function_call.model_dump(), indent=2, width=80)}\n```"
-                        responses.append(
-                            gr.ChatMessage(
-                                role="assistant",
-                                content=f"{part.function_call.name}:\n{formatted_call}",
-                                metadata={"title": "🛠️ Tool Call"},
-                            )
-                        )
-                    elif part.function_response:
-                        formatted_response = f"```python\n{pformat(part.function_response.model_dump(), indent=2, width=80)}\n```"
 
-                        responses.append(
-                            gr.ChatMessage(
-                                role="assistant",
-                                content=formatted_response,
-                                metadata={"title": "⚡ Tool Response"},
-                            )
-                        )
+def load_image_as_part(file_path: str) -> types.Part:
+    """Load an image file and convert it to a Part with inline data.
 
-            # Key Concept: is_final_response() marks the concluding message for the turn
-            if event.is_final_response():
-                if event.content and event.content.parts:
-                    # Extract text from the first part
-                    final_response_text = event.content.parts[0].text
-                elif event.actions and event.actions.escalate:
-                    # Handle potential errors/escalations
-                    final_response_text = (
-                        f"Agent escalated: {event.error_message or 'No specific message.'}"
-                    )
-                responses.append(
-                    gr.ChatMessage(role="assistant", content=final_response_text)
-                )
-                yield responses
-                break  # Stop processing events once the final response is found
+    Args:
+        file_path: Path to the image file.
 
-            yield responses
-    except Exception as e:
-        yield [
-            gr.ChatMessage(
-                role="assistant",
-                content=f"Error communicating with agent: {str(e)}",
-            )
-        ]
+    Returns:
+        A Part object with the image data.
+    """
+    mime_type, _ = mimetypes.guess_type(file_path)
+
+    with open(file_path, "rb") as f:
+        image_bytes = f.read()
+
+    return types.Part(inline_data=types.Blob(mime_type=mime_type, data=image_bytes))
+
+
+def build_message_parts(message: Dict[str, Any]) -> List[types.Part]:
+    """Build a list of Parts from a Gradio message dictionary.
+
+    Args:
+        message: Dictionary containing 'text' and 'files' keys.
+
+    Returns:
+        List of Part objects for the message content.
+    """
+    parts = []
+
+    # Add text part if present
+    text_content = message.get("text", "")
+    if text_content:
+        parts.append(types.Part(text=text_content))
+
+    # Add image parts from uploaded files
+    files = message.get("files", [])
+    for file_path in files:
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type and mime_type.startswith("image/"):
+            parts.append(load_image_as_part(file_path))
+
+    return parts
+
+
+def write_artifact_to_gradio_dir(
+    artifact_bytes: bytes, mime_type: str, artifact_name: str
+) -> str:
+    """Write artifact bytes to the Gradio artifacts directory.
+
+    Args:
+        artifact_bytes: Binary data of the artifact.
+        mime_type: MIME type of the artifact.
+        artifact_name: Name of the artifact file.
+
+    Returns:
+        Path to the created file.
+    """
+    # Ensure artifact has correct extension based on mime_type
+    artifact_path = Path(artifact_name)
+    expected_ext = mimetypes.guess_extension(mime_type) or ""
+
+    # Add extension if missing
+    if not artifact_path.suffix and expected_ext:
+        artifact_name = f"{artifact_name}{expected_ext}"
+
+    # Write to Gradio artifacts directory
+    file_path = GRADIO_ARTIFACT_DIR / artifact_name
+    with open(file_path, "wb") as f:
+        f.write(artifact_bytes)
+
+    return str(file_path)
 
 
 if __name__ == "__main__":
