@@ -34,6 +34,7 @@ USER_ID = "default_user"
 SESSION_ID = "default_session"
 SESSION_SERVICE = InMemorySessionService()
 ARTIFACT_SERVICE = InMemoryArtifactService()
+gr.Progress()
 
 # Create fresh artifacts directory (delete if exists)
 GRADIO_ARTIFACT_DIR = Path("gradio_artifacts")
@@ -88,6 +89,7 @@ async def get_response_from_agent(
                             metadata={"title": "🛠️ Tool Call"},
                         )
                     )
+                    yield responses
                 elif part.function_response:
                     formatted_response = f"```python\n{pformat(part.function_response.model_dump(), indent=2, width=80)}\n```"
 
@@ -120,6 +122,8 @@ async def get_response_from_agent(
                             )
                         )
 
+                        yield responses
+
                     responses.append(
                         gr.ChatMessage(
                             role="assistant",
@@ -127,6 +131,8 @@ async def get_response_from_agent(
                             metadata={"title": "⚡ Tool Response"},
                         )
                     )
+
+                    yield responses
                 else:
                     responses.append(
                         gr.ChatMessage(
@@ -135,7 +141,7 @@ async def get_response_from_agent(
                         )
                     )
 
-                yield responses
+                    yield responses
 
 
 async def initialize_session_if_not_exists():
